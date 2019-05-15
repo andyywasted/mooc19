@@ -1,0 +1,165 @@
+
+public class Laskuri {
+    
+    private int alkuarvo;
+    
+    public Laskuri(int alkuarvo){
+        this.alkuarvo = alkuarvo;
+    }
+    public Laskuri(){
+        this.alkuarvo = 0;
+    }
+    public void lisaa(int lisays){
+        if (lisays >= 0){
+            this.alkuarvo = this.alkuarvo + lisays;
+        }
+    }
+    public void vahenna(int vahennys){
+        if (vahennys >= 0){
+            this.alkuarvo = this.alkuarvo - vahennys;
+        }
+    }
+    public int arvo(){
+        return this.alkuarvo;
+    }
+    public void lisaa(){
+        this.alkuarvo = this.alkuarvo + 1;
+    }
+    public void vahenna(){
+        this.alkuarvo = this.alkuarvo - 1;
+    }
+}
+//////////////////////////////////
+import java.util.ArrayList;
+
+public class Pakkaus {
+    
+    private ArrayList<Lahja> lahjat;
+    
+    public Pakkaus() {
+        this.lahjat = new ArrayList<>();        
+    }
+    public void lisaaLahja(Lahja lahja){        
+        lahjat.add(lahja);
+    }
+    public int yhteispaino(){
+        int massa = 0;
+        for(Lahja painoLahja : lahjat){
+            massa = massa + painoLahja.getPaino();
+        }        
+        return massa;
+    }
+}
+
+
+
+public class Kasvatuslaitos {
+    
+    private int kerrat = 0;
+
+    //public Kasvatuslaitos(int kerrat) {
+      //  this.kerrat = 0;
+    //}
+    public int punnitse(Henkilo henkilo) {
+        // palautetaan parametrina annetun henkilön paino
+        this.kerrat++;
+        return henkilo.getPaino();
+    }
+    public void syota(Henkilo henkilo){
+        henkilo.setPaino(henkilo.getPaino() + 1);
+    }
+    public int punnitukset(){
+        return this.kerrat;
+    }
+
+}
+
+
+public class Paaohjelma {
+
+    public static void main(String[] args) {
+        // kirjoita tänne testikoodia 
+
+    // esimerkkipääohjelma tehtävän ensimmäiseen kohtaan
+
+    Kasvatuslaitos haaganNeuvola = new Kasvatuslaitos();
+
+    Henkilo eero = new Henkilo("Eero", 1, 110, 7);
+    Henkilo pekka = new Henkilo("Pekka", 33, 176, 85);
+
+    System.out.println("punnituksia tehty " + haaganNeuvola.punnitukset());
+
+    haaganNeuvola.punnitse(eero);
+    haaganNeuvola.punnitse(pekka);
+
+    System.out.println("punnituksia tehty " + haaganNeuvola.punnitukset());
+
+    haaganNeuvola.punnitse(eero);
+    haaganNeuvola.punnitse(eero);
+    haaganNeuvola.punnitse(eero);
+    haaganNeuvola.punnitse(eero);
+
+    System.out.println("punnituksia tehty " + haaganNeuvola.punnitukset());
+
+
+
+    }
+}
+//////////////////////////////////////////////////////
+
+public class Lahja {
+    
+    private String nimi;
+    private int paino;
+
+    public Lahja(String nimi,int paino) {
+        this.nimi = nimi;
+        this.paino = paino;
+    }
+    public String getNimi() {
+        return nimi;
+    }
+    public int getPaino() {
+        return paino;
+    }    
+    public String toString() {
+        return nimi + "(" + paino + "kg)"; 
+    }    
+}
+
+
+
+public class Main {
+
+    public static void main(String[] args) {
+        // käytä tätä pääohjelmaa luokkiesi testaamiseen!
+        Lahja kirja = new Lahja("Aapiskukko", 2);
+
+        Pakkaus paketti = new Pakkaus();
+        paketti.lisaaLahja(kirja);
+        System.out.println(paketti.yhteispaino());
+    
+    }
+}
+
+
+import java.util.ArrayList;
+
+public class Pakkaus {
+    
+    private ArrayList<Lahja> lahjat;
+    
+    public Pakkaus() {
+        this.lahjat = new ArrayList<>();        
+    }
+    public void lisaaLahja(Lahja lahja){        
+        lahjat.add(lahja);
+    }
+    public int yhteispaino(){
+        int massa = 0;
+        for(Lahja painoLahja : lahjat){
+            massa = massa + painoLahja.getPaino();
+        }        
+        return massa;
+    }
+}
