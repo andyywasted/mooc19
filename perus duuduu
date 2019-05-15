@@ -1,0 +1,283 @@
+
+import java.util.Scanner;
+
+public class Paaohjelma {
+
+    public static void main(String[] args) {
+        Scanner lukija = new Scanner(System.in);
+
+        // Tee sovelluksesi tänne -- kannattaa harkita sovelluksen pilkkomista
+        // useampaan luokkaan.
+         Arvosanatilastot jakauma = new Arvosanatilastot();
+
+        System.out.println("Syötä yhteispisteet, -1 lopettaa: ");
+        while (true) {
+            int luku = Integer.valueOf(lukija.nextLine());
+            if (luku == -1) {
+                break;
+            }
+
+            jakauma.lisaaPistemaara(luku);
+        }
+
+        jakauma.tulosta();
+    }
+}
+
+
+import java.util.ArrayList;
+
+public class Arvosanatilastot {
+    
+    private ArrayList<Integer> pisteet;
+
+    public Arvosanatilastot() {
+        this.pisteet = new ArrayList<>();
+    }
+
+    public void lisaaPistemaara(int pisteet) {
+        if (pisteet < 0 || pisteet > 100) {
+            return;
+        }
+
+        this.pisteet.add(pisteet);
+    }
+
+    public void tulosta() {
+        double summa = 0;
+        double hyvaksyttyjenSumma = 0;
+        int hyvaksyttyjenLkm = 0;
+
+        for (Integer piste : pisteet) {
+            summa += piste;
+
+            if (piste >= 50) {
+                hyvaksyttyjenSumma += piste;
+                hyvaksyttyjenLkm++;
+            }
+        }
+
+        System.out.println("Pisteiden keskiarvo (kaikki): " + summa / this.pisteet.size());
+        if (hyvaksyttyjenLkm > 0) {
+            System.out.println("Pisteiden keskiarvo (hyväksytyt): " + hyvaksyttyjenSumma / hyvaksyttyjenLkm);
+        } else {
+            System.out.println("Pisteiden keskiarvo (hyväksytyt): -");
+        }
+
+        System.out.println("Hyväksymisprosentti: " + (100.0 * hyvaksyttyjenLkm / this.pisteet.size()));
+
+        System.out.println("Arvosanajakauma:");
+        for (int i = 5; i >= 0; i--) {
+            System.out.println(i + ": " + tahtienTulostus(i));
+        }
+    }
+
+    private String tahtienTulostus(int arvosana) {
+        int montakotahtea = 0;
+
+        for (Integer piste : pisteet) {
+            if (laskeArvosana(piste) == arvosana) {
+                montakotahtea++;
+            }
+        }
+
+        return tahtia(montakotahtea);
+    }
+
+    // seuraavat metodit ovat vain luokan omaan käyttöön ja ne on määritelty privateksi eli ei ulospäin näkyviksi
+    private String tahtia(int n) {
+        String tahdet = "";
+        for (int i = 0; i < n; i++) {
+            tahdet += "*";
+        }
+        return tahdet;
+    }
+
+    private int laskeArvosana(int pistemaara) {
+
+        int numero = 5;
+
+        if (pistemaara < 50) {
+            numero = 0;
+        } else if (pistemaara < 60) {
+            numero = 1;
+        } else if (pistemaara < 70) {
+            numero = 2;
+        } else if (pistemaara < 80) {
+            numero = 3;
+        } else if (pistemaara < 90) {
+            numero = 4;
+        }
+
+        return numero;
+    }
+    
+}
+////////////////////////////////////////////////////////////////////////
+
+import java.util.Scanner;
+
+public class Kayttoliittyma {
+
+    private Scanner lukija;
+    private LintuTietokanta ltk;
+
+    public Kayttoliittyma(Scanner lukija, LintuTietokanta ltk) {
+        this.lukija = lukija;
+        this.ltk = ltk;
+    }
+
+    public void kaynnista() {
+
+        while (true) {
+            String komento = kysy("?");
+
+            if (komento.equals("Lopeta")) {
+                break;
+            } else if (komento.equals("Lisaa")) {
+                lisaa();
+            } else if (komento.equals("Havainto")) {
+                havainto();
+            } else if (komento.equals("Nayta")) {
+                nayta();
+            } else if (komento.equals("Tilasto")) {
+                tilasto();
+            } else {
+                System.out.println("Tuntematon komento!");
+            }
+        }
+    }
+
+    public String kysy(String kysymys) {
+        System.out.print(kysymys + " ");
+        return lukija.nextLine();
+    }
+
+    public void lisaa() {
+        String nimi = kysy("Nimi:");
+        String latNimi = kysy("Latinankielinen nimi:");
+
+        ltk.lisaa(nimi, latNimi);
+    }
+
+    public void havainto() {
+        String nimi = kysy("Nimi:");
+
+        boolean onnistuiko = ltk.havainto(nimi);
+        if (!onnistuiko) {
+            System.out.println(nimi + " ei ole lintu!");
+        }
+    }
+
+    public void nayta() {
+        String nimi = kysy("Nimi:");
+        String mjono = ltk.nayta(nimi);
+        if (mjono == null) {
+            System.out.println(nimi + " ei ole lintu!");
+        } else {
+            System.out.println(mjono);
+        }
+    }
+
+    public void tilasto() {
+        System.out.print(ltk.tilasto());
+    }    
+}
+
+
+
+public class Lintu {
+    private String nimi;
+    private String latNimi;
+    private int havainnot;
+
+    public Lintu(String nimi, String latNimi) {
+        this.nimi = nimi;
+        this.latNimi = latNimi;
+        this.havainnot = 0;
+    }
+
+    public String nimi() {
+        return this.nimi;
+    }
+
+    public void havainto() {
+        this.havainnot++;
+    }
+
+    public String toString() {
+        return this.nimi + " (" + this.latNimi + "): " + this.havainnot + " havaintoa";
+    }   
+}
+
+
+
+
+import java.util.ArrayList;
+
+public class LintuTietokanta {
+
+    private ArrayList<Lintu> linnut;
+
+    public LintuTietokanta() {
+        this.linnut = new ArrayList<>();
+    }
+
+    public boolean havainto(String nimi) {
+        for (Lintu lintu : linnut) {
+            if (lintu.nimi().equals(nimi)) {
+                lintu.havainto();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void lisaa(String nimi, String latNimi) {
+        this.linnut.add(new Lintu(nimi, latNimi));
+    }
+
+    public String nayta(String nimi) {
+        for (Lintu lintu : linnut) {
+            if (lintu.nimi().equals(nimi)) {
+                return lintu.toString();
+            }
+        }
+
+        return null;
+    }
+
+    public String tilasto() {
+        String tulos = "";
+        for (Lintu lintu : linnut) {
+            tulos += lintu.toString();
+        }
+
+        return tulos;
+    }
+
+    
+}
+
+
+
+
+import java.util.Scanner;
+
+public class Paaohjelma {
+
+    public static void main(String[] args) {
+        // HUOM! Älä luo ohjelmassa muita Scanner-olioita. Jos ja toivottavasti
+        // kun teet muita luokkia, anna allaoleva Scanner-olio niille
+        // tarvittaessa parametrina.
+
+        Scanner lukija = new Scanner(System.in);
+        
+        LintuTietokanta ltk = new LintuTietokanta();
+
+        Kayttoliittyma kayttoliittyma = new Kayttoliittyma(lukija, ltk);
+        kayttoliittyma.kaynnista();
+    }
+
+}
