@@ -1,0 +1,338 @@
+
+public class Lista<T> {
+    
+    private T[] arvot;
+    private int arvoja;
+
+    public Lista() {
+        this.arvot = (T[]) new Object[10];
+        this.arvoja = 0;
+    }
+    public void lisaa(T arvo) {
+        if(this.arvoja == this.arvot.length) {
+            kasvata();
+    }
+
+        this.arvot[this.arvoja] = arvo;
+        this.arvoja++;
+    }
+    private void kasvata() {
+    int uusiKoko = this.arvot.length + this.arvot.length / 2;
+    T[] uusi = (T[]) new Object[uusiKoko];
+    for (int i = 0; i < this.arvot.length; i++) {
+        uusi[i] = this.arvot[i];
+    }
+
+    this.arvot = uusi;
+    }
+    public boolean sisaltaa(T arvo) {
+        return arvonIndeksi(arvo) >= 0;
+    }
+    public void poista(T arvo) {
+        int arvonIndeksi = arvonIndeksi(arvo);
+        if (arvonIndeksi < 0) {
+            return; // ei löydy
+        }
+
+        siirraVasemmalle(arvonIndeksi);
+        this.arvoja--;
+    }
+    private int arvonIndeksi(T arvo) {
+        for (int i = 0; i < this.arvoja; i++) {
+            if (this.arvot[i].equals(arvo)) {
+            return i;
+            }
+        }
+        return -1;
+    }
+    private void siirraVasemmalle(int indeksistaLahtien) {
+        for (int i = indeksistaLahtien; i < this.arvoja - 1; i++) {
+            this.arvot[i] = this.arvot[i + 1];
+        }
+    }
+    public T arvo(int indeksi) {
+        if (indeksi < 0 || indeksi >= this.arvoja) {
+            throw new ArrayIndexOutOfBoundsException("Indeksi " + indeksi + " alueen [0, " + this.arvoja + "[ ulkopuolella.");
+        }
+        return this.arvot[indeksi];
+    }
+    public int koko() {
+        return this.arvoja;
+    }   
+}
+//////////////////////////////////////////////////////////////////////
+
+import java.util.ArrayList;
+import java.util.Random;
+
+public class Lottorivi {
+
+    private ArrayList<Integer> numerot;
+
+    public Lottorivi() {
+        // Arvo numerot heti LottoRivin luomisen yhteydessä
+        this.arvoNumerot();
+    }
+
+    public ArrayList<Integer> numerot() {
+        return this.numerot;
+    }
+
+    public void arvoNumerot() {
+        // Alustetaan lista numeroille
+        this.numerot = new ArrayList<>();
+        // Kirjoita numeroiden arvonta tänne
+        // kannattanee hyödyntää metodia sisaltaaNumeron
+        Random random = new Random();
+
+        while (this.numerot.size() < 7) {
+            int uusiNumero = random.nextInt(40) + 1;
+            boolean numeroOliJoArvottu = this.sisaltaaNumeron(uusiNumero);
+
+            // Lisätään uusi numero vain, jos se ei ole jo arvottujen joukossa
+            if (!numeroOliJoArvottu) {
+                this.numerot.add(uusiNumero);
+            }
+        }
+    }
+
+    public boolean sisaltaaNumeron(int numero) {
+        // Testaa tässä onko numero jo arvottujen numeroiden joukossa
+        return this.numerot.contains(numero);
+    }
+}
+
+
+
+import java.util.ArrayList;
+
+public class Ohjelma {
+
+    public static void main(String[] args) {
+        Lottorivi rivi = new Lottorivi();
+        ArrayList<Integer> lottonumerot = rivi.numerot();
+
+        System.out.println("Lottonumerot:");
+        for (Integer numero : lottonumerot) {
+            System.out.print(numero + " ");
+        }
+        System.out.println("");
+    }
+}
+/////////////////////////////////////////////////
+
+public class Ohjelma {
+
+    public static void main(String[] args) {
+        // Testaa Taikanelio-luokkaasi täällä
+
+        Taikaneliotehdas tt = new Taikaneliotehdas();
+        System.out.println(tt.luoTaikanelio(5));
+    }
+}
+
+
+public class Taikaneliotehdas {
+
+    public Taikanelio luoTaikanelio(int koko) {
+
+        Taikanelio nelio = new Taikanelio(koko);
+
+        // toteuta taikaneliön luominen Siamese method -algoritmilla tänne
+        int x = koko / 2;
+        int y = 0;
+
+        int luku = 1;
+        int lukuja = koko * koko;
+
+        while (luku <= lukuja) {
+            nelio.asetaArvo(x, y, luku);
+
+            // onko oikealla yläpuolella oleva paikka vapaana
+            // haetaan paikka
+            int kandidaattiY = y - 1;
+            int kandidaattiX = x + 1;
+
+            if (kandidaattiY < 0) {
+                kandidaattiY += koko;
+            }
+
+            if (kandidaattiX >= koko) {
+                kandidaattiX %= koko;
+            }
+
+            // jos paikka on vapaana, tehdään siirto sinne
+            if (nelio.annaArvo(kandidaattiX, kandidaattiY) == 0) {
+                x = kandidaattiX;
+                y = kandidaattiY;
+            } else {
+                // paikka ei ole vapaana, siirrytään "alas"
+                y++;
+                if (y >= koko) {
+                    y = 0;
+                }
+            }
+
+            luku++;
+
+        }
+
+        return nelio;
+    }
+
+}
+
+
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class Taikanelio {
+
+    private int[][] nelio;
+
+    // valmis konstruktori
+    public Taikanelio(int koko) {
+        if (koko < 2) {
+            koko = 2;
+        }
+
+        this.nelio = new int[koko][koko];
+    }
+
+    // toteuta nämä kolme metodia
+    public ArrayList<Integer> rivienSummat() {
+        ArrayList<Integer> rivienSummat = new ArrayList<>();
+        for (int y = 0; y < nelio.length; y++) {
+            int summa = 0;
+            for (int x = 0; x < nelio[y].length; x++) {
+                summa += nelio[y][x];
+            }
+
+            rivienSummat.add(summa);
+        }
+
+        return rivienSummat;
+
+    }
+
+    public ArrayList<Integer> sarakkeidenSummat() {
+        ArrayList<Integer> sarakkeidenSummat = new ArrayList<>();
+        for (int y = 0; y < nelio.length; y++) {
+            int summa = 0;
+            for (int x = 0; x < nelio[y].length; x++) {
+                summa += nelio[x][y];
+            }
+
+            sarakkeidenSummat.add(summa);
+        }
+
+        return sarakkeidenSummat;
+
+    }
+
+    public ArrayList<Integer> lavistajienSummat() {
+        ArrayList<Integer> sarakkeidenSummat = new ArrayList<>();
+
+        int summa = 0;
+        for (int y = 0; y < nelio.length; y++) {
+            summa += nelio[y][y];
+        }
+        sarakkeidenSummat.add(summa);
+
+        summa = 0;
+        for (int y = 0; y < nelio.length; y++) {
+            summa += nelio[nelio.length - y - 1][y];
+        }
+        sarakkeidenSummat.add(summa);
+
+        return sarakkeidenSummat;
+
+    }
+
+    // valmiit apumetodit -- älä koske näihin
+    public boolean onTaikanelio() {
+        return summatSamat() && kaikkiNumerotEri();
+    }
+
+    public ArrayList<Integer> annaKaikkiNumerot() {
+        ArrayList<Integer> numerot = new ArrayList<>();
+        for (int rivi = 0; rivi < nelio.length; rivi++) {
+            for (int sarake = 0; sarake < nelio[rivi].length; sarake++) {
+                numerot.add(nelio[rivi][sarake]);
+            }
+        }
+
+        return numerot;
+    }
+
+    public boolean kaikkiNumerotEri() {
+        ArrayList<Integer> numerot = annaKaikkiNumerot();
+
+        Collections.sort(numerot);
+        for (int i = 1; i < numerot.size(); i++) {
+            if (numerot.get(i - 1) == numerot.get(i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean summatSamat() {
+        ArrayList<Integer> summat = new ArrayList<>();
+        summat.addAll(rivienSummat());
+        summat.addAll(sarakkeidenSummat());
+        summat.addAll(lavistajienSummat());
+
+        if (summat.size() < 3) {
+            return false;
+        }
+
+        for (int i = 1; i < summat.size(); i++) {
+            if (summat.get(i - 1) != summat.get(i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public int annaArvo(int x, int y) {
+        if (x < 0 || y < 0 || x >= getLeveys() || y >= getKorkeus()) {
+            return - 1;
+        }
+
+        return this.nelio[y][x];
+    }
+
+    public void asetaArvo(int x, int y, int arvo) {
+        if (x < 0 || y < 0 || x >= getLeveys() || y >= getKorkeus()) {
+            return;
+        }
+
+        this.nelio[y][x] = arvo;
+    }
+
+    public int getLeveys() {
+        return this.nelio.length;
+    }
+
+    public int getKorkeus() {
+        return this.nelio.length;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder palautus = new StringBuilder();
+        for (int rivi = 0; rivi < nelio.length; rivi++) {
+            for (int sarake = 0; sarake < nelio[rivi].length; sarake++) {
+                palautus.append(nelio[rivi][sarake]).append("\t");
+            }
+
+            palautus.append("\n");
+        }
+
+        return palautus.toString();
+    }
+}
