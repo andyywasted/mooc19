@@ -1,0 +1,937 @@
+package sovellus;
+
+ 
+
+import java.io.IOException;
+
+import java.nio.file.Files;
+
+import java.nio.file.Paths;
+
+import java.util.ArrayList;
+
+import java.util.List;
+
+import javafx.application.Application;
+
+import javafx.scene.Scene;
+
+import javafx.scene.chart.LineChart;
+
+import javafx.scene.chart.NumberAxis;
+
+import javafx.scene.chart.XYChart;
+
+import javafx.stage.Stage;
+
+ 
+
+public class PuolueetSovellus extends Application {
+
+ 
+
+    @Override
+
+    public void start(Stage ikkuna) {
+
+        List<String[]> rivit = new ArrayList<>();
+
+        try {
+
+            Files.lines(Paths.get("puoluedata.tsv")).map(line -> line.split("\t")).forEach(rivi -> rivit.add(rivi));
+
+        } catch (IOException ex) {
+
+            System.out.println("Tiedoston \"puoluedata.tsv\" lukeminen epäonnistui.");
+
+            return;
+
+        }
+
+ 
+
+        NumberAxis xAkseli = new NumberAxis(1968, 2008, 4);
+
+        NumberAxis yAkseli = new NumberAxis();
+
+ 
+
+        LineChart<Number, Number> viivakaavio = new LineChart<>(xAkseli, yAkseli);
+
+        viivakaavio.setTitle("Puolueiden suhteellinen kannatus");
+
+ 
+
+        for (int i = 1; i < rivit.size(); i++) {
+
+            String[] rivi = rivit.get(i);
+
+ 
+
+            XYChart.Series data = new XYChart.Series();
+
+            data.setName(rivi[0]);
+
+ 
+
+            for (int sarake = 1; sarake < rivi.length; sarake++) {
+
+                String arvo = rivi[sarake];
+
+                if (arvo.equals("-")) {
+
+                    continue;
+
+                }
+
+ 
+
+                int vuosi = Integer.parseInt(rivit.get(0)[sarake]);
+
+                data.getData().add(new XYChart.Data(vuosi, Double.parseDouble(arvo)));
+
+            }
+
+ 
+
+            viivakaavio.getData().add(data);
+
+ 
+
+        }
+
+ 
+
+        Scene nakyma = new Scene(viivakaavio, 400, 300);
+
+        ikkuna.setScene(nakyma);
+
+        ikkuna.show();
+
+    }
+
+ 
+
+    public static void main(String[] args) {
+
+        launch(PuolueetSovellus.class);
+
+
+    }
+
+ 
+
+}
+//////////////////////////////////////////////////////
+package sovellus;
+
+ 
+
+import javafx.application.Application;
+
+import javafx.geometry.Insets;
+
+import javafx.scene.Scene;
+
+import javafx.scene.chart.LineChart;
+
+import javafx.scene.chart.NumberAxis;
+
+import javafx.scene.chart.XYChart;
+
+import javafx.scene.control.Label;
+
+import javafx.scene.control.Slider;
+
+import javafx.scene.layout.BorderPane;
+
+import javafx.scene.layout.VBox;
+
+import javafx.stage.Stage;
+
+ 
+
+public class SaastolaskuriSovellus extends Application {
+
+ 
+
+    @Override
+
+    public void start(Stage ikkuna) {
+
+        BorderPane asettelu = new BorderPane();
+
+ 
+
+        Slider tallennus = new Slider();
+
+        tallennus.setMin(25);
+
+        tallennus.setMax(250);
+
+        tallennus.setSnapToTicks(true);
+
+        tallennus.setBlockIncrement(500);
+
+        tallennus.setShowTickLabels(true);
+
+        tallennus.setShowTickMarks(true);
+
+ 
+
+        Slider korko = new Slider();
+
+        korko.setMin(0);
+
+        korko.setMax(10);
+
+        korko.setMinorTickCount(10);
+
+        korko.setShowTickLabels(true);
+
+        korko.setShowTickMarks(true);
+
+ 
+
+        Label tallennusTeksti = new Label("25");
+
+        Label korkoTeksti = new Label("0");
+
+ 
+
+        BorderPane tallennusAsettelu = new BorderPane();
+
+        tallennusAsettelu.setLeft(new Label("Kuukausittainen tallennus"));
+
+        tallennusAsettelu.setCenter(tallennus);
+
+        tallennusAsettelu.setRight(tallennusTeksti);
+
+        tallennusAsettelu.setPadding(new Insets(10));
+
+ 
+
+        BorderPane korkoAsettelu = new BorderPane();
+
+        korkoAsettelu.setLeft(new Label("Vuosittainen korko"));
+
+        korkoAsettelu.setCenter(korko);
+
+        korkoAsettelu.setRight(korkoTeksti);
+
+        korkoAsettelu.setPadding(new Insets(10));
+
+ 
+
+        VBox ylaAsettelu = new VBox();
+
+        ylaAsettelu.getChildren().add(tallennusAsettelu);
+
+        ylaAsettelu.getChildren().add(korkoAsettelu);
+
+ 
+
+        ylaAsettelu.setPadding(new Insets(10));
+
+        ylaAsettelu.setSpacing(10);
+
+ 
+
+        asettelu.setTop(ylaAsettelu);
+
+ 
+
+        NumberAxis xAkseli = new NumberAxis(0, 30, 1);
+
+        NumberAxis yAkseli = new NumberAxis();
+
+ 
+
+        LineChart<Number, Number> viivakaavio = new LineChart<>(xAkseli, yAkseli);
+
+        viivakaavio.setAnimated(false);
+
+        viivakaavio.setLegendVisible(false);
+
+        viivakaavio.setTitle("Säästölaskuri");
+
+ 
+
+        asettelu.setCenter(viivakaavio);
+
+ 
+
+        XYChart.Series saastot = new XYChart.Series();
+
+        XYChart.Series saastotKoroilla = new XYChart.Series();
+
+ 
+
+        viivakaavio.getData().add(saastot);
+
+        viivakaavio.getData().add(saastotKoroilla);
+
+ 
+
+        tallennus.setOnMouseReleased(e -> {
+
+            tallennusTeksti.setText("" + tallennus.getValue());
+
+            paivitaKaavio(tallennus.getValue(), korko.getValue(), saastot, saastotKoroilla);
+
+        });
+
+ 
+
+        korko.setOnMouseReleased(e -> {
+
+ 
+
+            String korkoString = "" + korko.getValue();
+
+            if (korkoString.length() > 4) {
+
+                korkoString = korkoString.substring(0, 4);
+
+            }
+
+            korkoTeksti.setText(korkoString);
+
+            paivitaKaavio(tallennus.getValue(), korko.getValue(), saastot, saastotKoroilla);
+
+        });
+
+ 
+
+        Scene nakyma = new Scene(asettelu, 640, 480);
+
+        ikkuna.setScene(nakyma);
+
+        ikkuna.show();
+
+    }
+
+ 
+
+    private void paivitaKaavio(double kuukausiSaasto, double korko, XYChart.Series saastot, XYChart.Series saastotKoroilla) {
+
+        saastot.getData().clear();
+
+        saastotKoroilla.getData().clear();
+
+ 
+
+        saastot.getData().add(new XYChart.Data(0, 0));
+
+        saastotKoroilla.getData().add(new XYChart.Data(0, 0));
+
+ 
+
+        double edellinen = 0;
+
+ 
+
+        for (int i = 1; i <= 30; i++) {
+
+            saastot.getData().add(new XYChart.Data(i, i * kuukausiSaasto * 12));
+
+ 
+
+            edellinen += kuukausiSaasto * 12;
+
+            edellinen *= (1 + korko / 100.0);
+
+ 
+
+            saastotKoroilla.getData().add(new XYChart.Data(i, edellinen));
+
+        }
+
+    }
+
+ 
+
+    public static void main(String[] args) {
+
+        launch(SaastolaskuriSovellus.class);
+
+        System.out.println("Hello world!");
+
+    }
+
+ 
+
+}
+
+/////////////////////////////////////////////////////////////////
+package sovellus;
+
+ 
+
+import java.io.IOException;
+
+import java.nio.file.Files;
+
+import java.nio.file.Paths;
+
+import java.util.ArrayList;
+
+import java.util.Arrays;
+
+import java.util.HashMap;
+
+import java.util.List;
+
+import java.util.Map;
+
+import java.util.TreeMap;
+
+import java.util.stream.Collectors;
+
+ 
+
+public class PyorailijaTilasto {
+
+ 
+
+    private List<String> rivit;
+
+ 
+
+    public PyorailijaTilasto(String tiedosto) {
+
+        try {
+
+            rivit = Files.lines(Paths.get(tiedosto)).collect(Collectors.toCollection(ArrayList::new));
+
+        } catch (IOException ex) {
+
+            throw new RuntimeException("Tiedoston " + tiedosto + " lukeminen epäonnistui. Virhe: " + ex.getMessage());
+
+        }
+
+    }
+
+ 
+
+    public List<String> paikat() {
+
+        List<String> paikat = Arrays.stream(rivit.get(0).split(";")).collect(Collectors.toList());
+
+        return paikat.subList(1, paikat.size());
+
+    }
+
+ 
+
+    public Map<String, Integer> pyorailijoitaKuukausittain(String paikka) {
+
+        List<String> paikat = paikat();
+
+        if (paikat.indexOf(paikka) < 0) {
+
+            return new HashMap<>();
+
+        }
+
+ 
+
+        Map<String, List<Integer>> mittaArvotKuukausittain = new TreeMap<>();
+
+ 
+
+        int indeksi = paikat.indexOf(paikka) + 1;
+
+        rivit.stream().map(merkkijono -> merkkijono.split(";"))
+
+                .filter(taulukko -> taulukko.length > 10)
+
+                .forEach(taulukko -> {
+
+                    String[] pvmTaulukko = taulukko[0].split(" ");
+
+                    if (pvmTaulukko.length < 3) {
+
+                        return;
+
+                    }
+
+ 
+
+                    String kuukausi = pvmTaulukko[3] + " / " + merkkijonoKuukaudenNumeroksi(pvmTaulukko[2]);
+
+ 
+
+                    mittaArvotKuukausittain.putIfAbsent(kuukausi, new ArrayList<>());
+
+ 
+
+                    int maara = 0;
+
+                    if (!taulukko[indeksi].isEmpty()) {
+
+                        maara = Integer.parseInt(taulukko[indeksi]);
+
+                    }
+
+ 
+
+                    mittaArvotKuukausittain.get(kuukausi).add(maara);
+
+                });
+
+ 
+
+        Map<String, Integer> pyorailijoidenLukumaarat = new TreeMap<>();
+
+        mittaArvotKuukausittain.keySet().stream().forEach(arvo -> {
+
+            pyorailijoidenLukumaarat.put(arvo, mittaArvotKuukausittain.get(arvo).stream().mapToInt(a -> a).sum());
+
+        });
+
+ 
+
+        return pyorailijoidenLukumaarat;
+
+    }
+
+ 
+
+    private String merkkijonoKuukaudenNumeroksi(String kuukausi) {
+
+        List<String> kuukaudet = Arrays.asList("tammi", "helmi", "maalis", "huhti", "touko", "kesä", "heinä", "elo", "syys", "loka", "marras", "joulu");
+
+        int numero = kuukaudet.indexOf(kuukausi) + 1;
+
+ 
+
+        if (numero < 10) {
+
+            return "0" + numero;
+
+        }
+
+ 
+
+        return "" + numero;
+
+    }
+
+}
+
+
+package sovellus;
+
+ 
+
+import java.util.Map;
+
+import javafx.application.Application;
+
+import javafx.collections.FXCollections;
+
+import javafx.collections.ObservableList;
+
+import javafx.geometry.Insets;
+
+import javafx.scene.Scene;
+
+import javafx.scene.chart.BarChart;
+
+
+import javafx.scene.chart.CategoryAxis;
+
+import javafx.scene.chart.NumberAxis;
+
+import javafx.scene.chart.XYChart;
+
+import javafx.scene.control.Label;
+
+import javafx.scene.control.ListView;
+
+import javafx.scene.input.MouseEvent;
+
+import javafx.scene.layout.GridPane;
+
+import javafx.stage.Stage;
+
+ 
+
+public class PyorailijaTilastotSovellus extends Application {
+
+ 
+
+    @Override
+
+    public void start(Stage ikkuna) {
+
+ 
+
+        PyorailijaTilasto tilasto = new PyorailijaTilasto("helsingin-pyorailijamaarat.csv");
+
+ 
+
+        GridPane gridPane = new GridPane();
+
+        gridPane.setVgap(10);
+
+        gridPane.setHgap(10);
+
+        gridPane.setPadding(new Insets(10, 10, 10, 10));
+
+ 
+
+        gridPane.add(new Label("Valitse tarkasteltava paikka"), 0, 0);
+
+ 
+
+        ObservableList<String> data = FXCollections.observableArrayList();
+
+        data.addAll(tilasto.paikat());
+
+ 
+
+        ListView<String> lista = new ListView<>(data);
+
+        gridPane.add(lista, 0, 1);
+
+ 
+
+        CategoryAxis xAkseli = new CategoryAxis();
+
+        NumberAxis yAkseli = new NumberAxis();
+
+        xAkseli.setLabel("Vuosi / Kuukausi");
+
+        yAkseli.setLabel("Pyöräilijöitä");
+
+ 
+
+        
+
+        BarChart<String, Number> kaavio = new BarChart<>(xAkseli, yAkseli);
+
+        kaavio.setAnimated(false);
+
+        kaavio.setLegendVisible(false);
+
+ 
+
+        lista.setOnMouseClicked((MouseEvent event) -> {
+
+            String valittu = lista.getSelectionModel().getSelectedItem();
+
+            Map<String, Integer> arvot = tilasto.pyorailijoitaKuukausittain(valittu);
+
+            kaavio.getData().clear();
+
+            XYChart.Series chartData = new XYChart.Series();
+
+ 
+
+            arvot.keySet().stream().forEach(aika -> {
+
+                chartData.getData().add(new XYChart.Data(aika, arvot.get(aika)));
+
+            });
+
+ 
+
+            kaavio.getData().add(chartData);
+
+        });
+
+ 
+
+        gridPane.add(kaavio, 1, 0, 1, 2);
+
+ 
+
+        Scene nakyma = new Scene(gridPane);
+
+ 
+
+        ikkuna.setScene(nakyma);
+
+        ikkuna.show();
+
+    }
+
+ 
+
+    public static void main(String[] args) {
+
+        launch(PyorailijaTilastotSovellus.class);
+
+    }
+
+ 
+
+}
+/////////////////////////////////////////////////////////////////////////////
+package kollaasi;
+
+ 
+
+import javafx.application.Application;
+
+import static javafx.application.Application.launch;
+
+import javafx.scene.Scene;
+
+import javafx.scene.image.Image;
+
+import javafx.scene.image.ImageView;
+
+import javafx.scene.image.PixelReader;
+
+import javafx.scene.image.PixelWriter;
+
+import javafx.scene.image.WritableImage;
+
+import javafx.scene.layout.Pane;
+
+import javafx.scene.paint.Color;
+
+import javafx.stage.Stage;
+
+ 
+
+public class KollaasiSovellus extends Application {
+
+ 
+
+    @Override
+
+    public void start(Stage stage) {
+
+ 
+
+        // esimerkki avaa kuvan, luo uuden kuvan, ja kopioi avatun kuvan 
+
+        // uuteen kuvaan pikseli kerrallaan
+
+        Image lahdeKuva = new Image("file:monalisa.png");
+
+ 
+
+        PixelReader kuvanLukija = lahdeKuva.getPixelReader();
+
+ 
+
+        int leveys = (int) lahdeKuva.getWidth();
+
+        int korkeus = (int) lahdeKuva.getHeight();
+
+ 
+
+        WritableImage kohdeKuva = new WritableImage(leveys, korkeus);
+
+        PixelWriter kuvanKirjoittaja = kohdeKuva.getPixelWriter();
+
+ 
+
+        int yKoordinaatti = 0;
+
+        while (yKoordinaatti < korkeus) {
+
+            int xKoordinaatti = 0;
+
+            while (xKoordinaatti < leveys) {
+
+ 
+
+                Color vari = kuvanLukija.getColor(xKoordinaatti, yKoordinaatti);
+
+                double punainen = vari.getRed();
+
+                double vihrea = vari.getGreen();
+
+                double sininen = vari.getBlue();
+
+                double lapinakyvyys = vari.getOpacity();
+
+ 
+
+                Color uusiVari = new Color(punainen, vihrea, sininen, lapinakyvyys);
+
+ 
+
+                kuvanKirjoittaja.setColor(xKoordinaatti, yKoordinaatti, uusiVari);
+
+ 
+
+                xKoordinaatti++;
+
+            }
+
+ 
+
+            yKoordinaatti++;
+
+        }
+
+ 
+
+        // luodaan kuvasta pienempi kopio vasempaan yläkulmaan
+
+        for (int x = 0; x < leveys / 2; x++) {
+
+            for (int y = 0; y < korkeus / 2; y++) {
+
+                Color vari = kuvanLukija.getColor(x * 2, y * 2);
+
+                kuvanKirjoittaja.setColor(x, y, vari);
+
+            }
+
+        }
+
+ 
+
+        // kopioidaan kopio muihin kulmiin
+
+        kuvanLukija = kohdeKuva.getPixelReader();
+
+        for (int x = 0; x < leveys / 2; x++) {
+
+            for (int y = 0; y < korkeus / 2; y++) {
+
+                Color vari = kuvanLukija.getColor(x, y);
+
+ 
+
+                kuvanKirjoittaja.setColor(x + leveys / 2, y, vari);
+
+                kuvanKirjoittaja.setColor(x, y + korkeus / 2, vari);
+
+                kuvanKirjoittaja.setColor(x + leveys / 2, y + korkeus / 2, vari);
+
+            }
+
+        }
+
+ 
+
+        // luodaan negatiivi
+
+        for (int x = 0; x < leveys; x++) {
+
+            for (int y = 0; y < korkeus; y++) {
+
+                Color vari = kuvanLukija.getColor(x, y);
+
+ 
+
+                double r = 1 - vari.getRed();
+
+                double g = 1 - vari.getGreen();
+
+                double b = 1 - vari.getBlue();
+
+ 
+
+                Color negatiivi = new Color(r, g, b, vari.getOpacity());
+
+ 
+
+                kuvanKirjoittaja.setColor(x, y, negatiivi);
+
+            }
+
+        }
+
+ 
+
+        ImageView kuva = new ImageView(kohdeKuva);
+
+ 
+
+        Pane pane = new Pane();
+
+        pane.getChildren().add(kuva);
+
+ 
+
+        stage.setScene(new Scene(pane));
+
+        stage.show();
+
+    }
+
+ 
+
+    public static void main(String[] args) {
+
+        launch(args);
+
+    }
+
+ 
+
+}
+//////////////////////////////////////////////////////////////////////////////
+package hurraa;
+
+ 
+
+import javafx.application.Application;
+
+import javafx.scene.Scene;
+
+import javafx.scene.control.Button;
+
+import javafx.scene.layout.BorderPane;
+
+import javafx.scene.media.AudioClip;
+
+import javafx.stage.Stage;
+
+ 
+
+public class HurraaSovellus extends Application {
+
+ 
+
+    @Override
+
+    public void start(Stage stage) throws Exception {
+
+        BorderPane pane = new BorderPane();
+
+ 
+
+        Button nappi = new Button("Hurraa!");
+
+        pane.setCenter(nappi);
+
+ 
+
+        AudioClip hurraa = new AudioClip("file:Applause-Yannick_Lemieux.wav");
+
+        nappi.setOnAction((event) -> hurraa.play());
+
+ 
+
+        Scene scene = new Scene(pane, 600, 400);
+
+ 
+
+        stage.setScene(scene);
+
+        stage.show();
+
+    }
+
+ 
+
+    public static void main(String[] args) {
+
+        launch(args);
+
+    }
+
+ 
+
+}
