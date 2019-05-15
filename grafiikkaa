@@ -1,0 +1,272 @@
+package tekstitilastointia;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+import java.util.Arrays;
+
+public class TekstitilastointiaSovellus extends Application {
+
+    public void start(Stage ikkuna) {
+        BorderPane asettelu = new BorderPane();
+        
+        Label t1 = new Label("Kirjaimia: 0");
+        Label t2 = new Label("Sanoja: 0");
+        Label t3 = new Label("Pisin sana on: ");
+
+        HBox tekstit = new HBox();
+        tekstit.setSpacing(10);
+        tekstit.getChildren().add(t1);
+        tekstit.getChildren().add(t2);
+        tekstit.getChildren().add(t3);
+        
+        TextArea vasenTeksti = new TextArea();
+        
+        asettelu.setBottom(tekstit);
+
+        asettelu.setCenter(vasenTeksti);
+        
+        vasenTeksti.textProperty().addListener((muutos, vanhaArvo, uusiArvo) -> {
+            int merkkeja = uusiArvo.length();
+            String[] palat = uusiArvo.split(" ");
+            int sanoja = palat.length;
+            String pisin = Arrays.stream(palat)
+                .sorted((s1, s2) -> s2.length() - s1.length())
+                .findFirst()
+                .get();
+
+
+            t1.setText("Kirjaimia: " + merkkeja);
+            t2.setText("Sanoja: " + sanoja);
+            t3.setText("Pisin sana on: " + pisin);
+
+            });
+        Scene nakyma = new Scene(asettelu);
+
+        ikkuna.setScene(nakyma);
+        ikkuna.show();
+        
+    }    
+
+    public static void main(String[] args) {
+        launch(TekstitilastointiaSovellus.class);
+    }
+
+}
+//////////////////////////////////////////////////////
+package sovellus;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+
+public class Harjoittelunakyma {
+
+    private Sanakirja sanakirja;
+    private String sana;
+
+    public Harjoittelunakyma(Sanakirja sanakirja) {
+        this.sanakirja = sanakirja;
+        this.sana = sanakirja.arvoSana();
+    }
+
+    public Parent getNakyma() {
+        GridPane asettelu = new GridPane();
+
+        Label sanaohje = new Label("Käännä sana '" + this.sana + "'");
+        TextField kaannoskentta = new TextField();
+
+        asettelu.setAlignment(Pos.CENTER);
+        asettelu.setVgap(10);
+        asettelu.setHgap(10);
+        asettelu.setPadding(new Insets(10, 10, 10, 10));
+
+        Button lisaanappi = new Button("Tarkista");
+
+        Label palaute = new Label("");
+
+        asettelu.add(sanaohje, 0, 0);
+        asettelu.add(kaannoskentta, 0, 1);
+        asettelu.add(lisaanappi, 0, 2);
+        asettelu.add(palaute, 0, 3);
+
+        lisaanappi.setOnMouseClicked((event) -> {
+            String kaannos = kaannoskentta.getText();
+            if (sanakirja.hae(sana).equals(kaannos)) {
+                palaute.setText("Oikein!");
+            } else {
+                palaute.setText("Väärin! Sanan '" + sana + "' käännös on '" + sanakirja.hae(sana) + "'.");
+                return;
+            }
+
+            this.sana = this.sanakirja.arvoSana();
+            sanaohje.setText("Käännä sana '" + this.sana + "'");
+            kaannoskentta.clear();
+        });
+
+        return asettelu;
+    }
+}
+
+package sovellus;
+
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+// END SOLUTION
+public class SanaharjoitteluSovellus extends Application {
+
+ private Sanakirja sanakirja;
+
+    @Override
+    public void init() throws Exception {
+        // 1. Luodaan sovelluksen käyttämä sanakirja
+        this.sanakirja = new Sanakirja();
+    }
+
+    @Override
+    public void start(Stage ikkuna) throws Exception {
+        // 2. Luodaan näkymät ("alinäkymät")
+        Harjoittelunakyma harjoittelunakyma = new Harjoittelunakyma(sanakirja);
+        Syottonakyma syottonakyma = new Syottonakyma(sanakirja);
+
+        // 3. Luodaan päätason asettelu
+        BorderPane asettelu = new BorderPane();
+
+        // 3.1. Luodaan päätason asettelun valikko
+        HBox valikko = new HBox();
+        valikko.setPadding(new Insets(20, 20, 20, 20));
+        valikko.setSpacing(10);
+
+        // 3.2. Luodaan valikon napit
+        Button lisaanappi = new Button("Lisää sanoja");
+        Button harjoittelenappi = new Button("Harjoittele");
+
+        // 3.3. Lisätään napit valikkoon
+        valikko.getChildren().addAll(lisaanappi, harjoittelenappi);
+        asettelu.setTop(valikko);
+
+        // 4. Liitetään alinäkymät nappeihin. Napin painaminen vaihtaa alinäkymää.
+        lisaanappi.setOnAction((event) -> asettelu.setCenter(syottonakyma.getNakyma()));
+        harjoittelenappi.setOnAction((event) -> asettelu.setCenter(harjoittelunakyma.getNakyma()));
+
+        // 5. Näytetään ensin syöttönäkymä
+        asettelu.setCenter(syottonakyma.getNakyma());
+
+        // 6. Luodaan päänäkymä ja asetetaan päätason asettelu siihen
+        Scene nakyma = new Scene(asettelu, 400, 300);
+
+        // 7. Näytetään sovellus
+        ikkuna.setScene(nakyma);
+        ikkuna.show();
+    }
+    
+    public static void main(String[] args) {
+        launch(SanaharjoitteluSovellus.class);
+    }
+}
+
+
+
+package sovellus;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+public class Sanakirja {
+
+    private List<String> sanat;
+    private Map<String, String> kaannokset;
+
+    public Sanakirja() {
+        this.sanat = new ArrayList<>();
+        this.kaannokset = new HashMap<>();
+
+        lisaa("sana", "word");
+    }
+
+    public String hae(String sana) {
+        return this.kaannokset.get(sana);
+    }
+
+    public void lisaa(String sana, String kaannos) {
+        if (!this.kaannokset.containsKey(sana)) {
+            this.sanat.add(sana);
+        }
+
+        this.kaannokset.put(sana, kaannos);
+    }
+
+    public String arvoSana() {
+        Random satunnainen = new Random();
+        return this.sanat.get(satunnainen.nextInt(this.sanat.size()));
+    }
+}
+
+package sovellus;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+
+public class Syottonakyma {
+
+    private Sanakirja sanakirja;
+
+    public Syottonakyma(Sanakirja sanakirja) {
+        this.sanakirja = sanakirja;
+    }
+
+    public Parent getNakyma() {
+        GridPane asettelu = new GridPane();
+
+        Label sanaohje = new Label("Sana");
+        TextField sanakentta = new TextField();
+        Label kaannosohje = new Label("Käännös");
+        TextField kaannoskentta = new TextField();
+
+        asettelu.setAlignment(Pos.CENTER);
+        asettelu.setVgap(10);
+        asettelu.setHgap(10);
+        asettelu.setPadding(new Insets(10, 10, 10, 10));
+
+        Button lisaanappi = new Button("Lisää sanapari");
+
+        asettelu.add(sanaohje, 0, 0);
+        asettelu.add(sanakentta, 0, 1);
+        asettelu.add(kaannosohje, 0, 2);
+        asettelu.add(kaannoskentta, 0, 3);
+        asettelu.add(lisaanappi, 0, 4);
+
+        lisaanappi.setOnMouseClicked((event) -> {
+            String sana = sanakentta.getText();
+            String kaannos = kaannoskentta.getText();
+
+            sanakirja.lisaa(sana, kaannos);
+
+            sanakentta.clear();
+            kaannoskentta.clear();
+        });
+
+        return asettelu;
+    }
+}
