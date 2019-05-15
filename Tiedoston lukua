@@ -1,0 +1,244 @@
+
+package sanakirja;
+
+import java.io.PrintWriter;
+import java.util.Scanner;
+import java.io.File;
+import java.util.ArrayList;
+
+public class MuistavaSanakirja {
+    
+    private ArrayList<String> kirja1 = new ArrayList<>();
+    private ArrayList<String> kirja2 = new ArrayList<>();
+    private boolean loytyiko;
+    private String tiedosto;
+    
+    public MuistavaSanakirja() {
+        kirja2 = new ArrayList();
+        kirja1 = new ArrayList();
+    }
+    public MuistavaSanakirja(String tiedosto) {
+        kirja2 = new ArrayList();
+        kirja1 = new ArrayList();
+        this.tiedosto = tiedosto;
+    }
+    public void lisaa(String sana, String kaannos){
+        kirja1.add(sana);
+        kirja2.add(kaannos);
+    }
+    public String kaanna(String sana){
+        if(kirja1.contains(sana)){
+            return kirja2.get(kirja1.indexOf(sana));
+        } if(kirja2.contains(sana)){
+            return kirja1.get(kirja2.indexOf(sana));
+        }
+        return null;
+    }
+    public void poista(String sana){
+        if(kirja1.contains(sana)){
+            int sana1 = (kirja1.indexOf(sana));
+            kirja1.remove(sana1);
+            kirja2.remove(sana1);
+        }if(kirja2.contains(sana)){
+            int sana2 = kirja2.indexOf(sana);
+            kirja2.remove(sana2);
+            kirja1.remove(sana2);
+        }else{           
+        }
+    }
+    public boolean lataa(){
+        boolean tila;
+        try{
+            Scanner tiedostoLukija = new Scanner(new File(this.tiedosto));
+            tila = true;
+            while(tiedostoLukija.hasNextLine()){
+                String rivi = tiedostoLukija.nextLine();
+                String[] osat = rivi.split(":");
+                kirja1.add(osat[0]);
+                kirja2.add(osat[1]);
+            }
+        }catch(Exception e){
+               System.out.println(e);
+               tila = false;
+        }
+        return tila;   
+    }
+    public boolean tallenna(){
+        boolean tila;
+        try{
+            PrintWriter kirjoittaja = new PrintWriter(this.tiedosto);
+
+            for(int i = 0;i < kirja1.size();i++){
+                kirjoittaja.println(kirja1.get(i) + ":" + kirja2.get(i));
+            }
+            kirjoittaja.close();
+            tila = true;
+        }catch(Exception e){
+            System.out.println(e);
+            tila = false;
+        }
+        return tila;
+    }
+}
+
+package sanakirja;
+
+public class Main {
+    public static void main(String[] args) {
+        // Testaa sanakirjaa täällä
+MuistavaSanakirja sanakirja = new MuistavaSanakirja("sanat.txt");
+sanakirja.lataa();
+
+// käytä sanakirjaa
+
+sanakirja.tallenna();
+    }
+}
+///////////////////////////////////////////
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class VieraslistaTiedostosta {
+
+    public static void main(String[] args) {
+        Scanner lukija = new Scanner(System.in);
+
+        System.out.println("Minkä niminen tiedosto luetaan? ");
+        String tiedosto = lukija.nextLine();
+
+        ArrayList<String> lista = new ArrayList<>();
+        // toteuta tiedoston lukeminen tässä.
+        try (Scanner tiedostonLukija = new Scanner(new File(tiedosto))) {
+
+            while (tiedostonLukija.hasNextLine()) {
+                lista.add(tiedostonLukija.nextLine());
+            }
+        } catch (Exception e) {
+            System.out.println("Virhe: " + e.getMessage());
+        }
+        
+        System.out.println("");
+
+        System.out.println("Syötä nimiä, tyhjä rivi lopettaa.");
+        while (true) {
+            String nimi = lukija.nextLine();
+            if (nimi.isEmpty()) {
+                break;
+            }
+
+            if (lista.contains(nimi)) {
+                System.out.println("Nimi on listalla.");
+            } else {
+                System.out.println("Nimi ei ole listalla.");
+            }
+        }
+
+        System.out.println("Kiitos!");
+        
+    }
+}
+//////////////////////////////////////////////////////////////
+import java.util.Scanner;
+
+public class Nuorin {
+
+    public static void main(String[] args) {
+        Scanner lukija = new Scanner(System.in);
+        
+        int vanhinIka = -1;
+        String vanhin = "";
+
+        while (true) {
+            System.out.print("Syötä nimi: ");
+            String rivi = lukija.nextLine();
+
+            if (rivi.equals("loppu")) {
+                break;
+            }
+
+            String[] palat = rivi.split(",");
+            String nimi = palat[0];
+            int ika = Integer.valueOf(palat[1]);
+
+            if (vanhin.equals("") || vanhinIka > ika) {
+            vanhin = nimi;
+            vanhinIka = ika;
+            }
+        }
+
+        System.out.println("Nuorin oli " + vanhin);
+
+    }
+}
+
+//////////////////////////////////////////////////////////
+import java.io.File;
+import java.util.Scanner;
+
+public class MittauksetTiedostosta {
+
+    public static void main(String[] args) {
+        Scanner lukija = new Scanner(System.in);
+
+        System.out.print("Tiedosto? ");
+        String tiedosto = lukija.nextLine();
+        System.out.print("Alaraja? ");
+        int alaraja = Integer.valueOf(lukija.nextLine());
+        System.out.print("Yläraja? ");
+        int ylaraja = Integer.valueOf(lukija.nextLine());
+        
+        int maara = 0;
+        
+        try (Scanner tiedostonLukija = new Scanner(new File(tiedosto))) {
+
+            while (tiedostonLukija.hasNextLine()) {
+                String rivi = tiedostonLukija.nextLine();
+                int luku = Integer.valueOf(rivi);
+                if(alaraja <= luku && ylaraja >= luku){
+                    maara++;
+
+                }
+
+            }
+            System.out.println("Lukuja: "+maara);
+        } catch (Exception e) {
+            System.out.println("Tiedoston "+tiedosto+" lukeminen epäonnistui.");
+        }
+
+
+    }
+    //////////////////////////////////////////////////
+    
+import java.util.Scanner;
+
+public class Nuorin {
+
+    public static void main(String[] args) {
+        Scanner lukija = new Scanner(System.in);
+        
+        int vanhinIka = -1;
+        String vanhin = "";
+
+        while (true) {
+            System.out.print("Syötä nimi: ");
+            String rivi = lukija.nextLine();
+
+            if (rivi.equals("loppu")) {
+                break;
+            }
+
+            String[] palat = rivi.split(",");
+            String nimi = palat[0];
+            int ika = Integer.valueOf(palat[1]);
+
+            if (vanhin.equals("") || vanhinIka > ika) {
+            vanhin = nimi;
+            vanhinIka = ika;
+            }
+        }
+
+        System.out.println("Nuorin oli " + vanhin);
+
+    }
+}
