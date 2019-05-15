@@ -1,0 +1,230 @@
+
+public class Kirja {
+
+    private String nimi;
+    private String sisalto;
+    private int julkaisuvuosi;
+
+    public Kirja(String nimi, int julkaisuvuosi, String sisalto) {
+        this.nimi = nimi;
+        this.julkaisuvuosi = julkaisuvuosi;
+        this.sisalto = sisalto;
+    }
+
+    public String getNimi() {
+        return this.nimi;
+    }
+
+    public void setNimi(String nimi) {
+        this.nimi = nimi;
+    }
+
+    public int getJulkaisuvuosi() {
+        return this.julkaisuvuosi;
+    }
+
+    public void setJulkaisuvuosi(int julkaisuvuosi) {
+        this.julkaisuvuosi = julkaisuvuosi;
+    }
+
+    public String getSisalto() {
+        return this.sisalto;
+    }
+
+    public void setSisalto(String sisalto) {
+        this.sisalto = sisalto;
+    }
+
+    public String toString() {
+        return "Nimi: " + this.nimi + " (" + this.julkaisuvuosi + ")\n"
+                + "Sisältö: " + this.sisalto;
+    }
+}
+
+
+import java.util.HashMap;
+
+public class Ohjelma {
+    
+    public static void tulostaArvot(HashMap<String, Kirja> hajautustaulu){
+
+        for(Kirja arvo: hajautustaulu.values()){
+            System.out.println(arvo);
+        }  
+    }
+    public static void tulostaArvoJosNimessa(HashMap<String, Kirja> hajautustaulu, String merkkijono){
+        for(Kirja arvo: hajautustaulu.values()){
+            if(arvo.getNimi().contains(merkkijono)){
+                System.out.println(arvo);
+            }
+        }    
+    }
+    public static void main(String[] args) {
+        // Testaa ohjelmasi toimintaa täällä!
+    }
+}
+////////////////////////////////////////////////////
+
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        String syote = "kaanna\n" + "apina\n" +
+                 "kaanna\n" + "juusto\n" +
+                 "lisaa\n" + "juusto\n" + "cheese\n" +
+                 "kaanna\n" + "juusto\n" +
+                 "lopeta\n";
+
+        Scanner lukija = new Scanner(syote);
+        Sanakirja sanakirja = new Sanakirja();
+
+        Tekstikayttoliittyma kayttoliittyma = new Tekstikayttoliittyma(lukija, sanakirja);
+        kayttoliittyma.kaynnista();
+    }
+}
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+
+public class Sanakirja {
+    private HashMap<String, String> kaannokset;
+
+    public Sanakirja() {
+        this.kaannokset = new HashMap<>();
+    }
+
+    public String kaanna(String sana) {
+        return this.kaannokset.get(sana);
+    }
+
+    public void lisaa(String sana, String kaannos) {
+        this.kaannokset.put(sana, kaannos);
+    }
+
+    public ArrayList<String> kaannoksetListana() {
+        ArrayList<String> kaannoksetListana = new ArrayList<>();
+        for (String avain : this.kaannokset.keySet()) {
+            kaannoksetListana.add(avain + " = " + this.kaannokset.get(avain));
+        }
+        return kaannoksetListana;
+    }
+
+    public int sanojenLukumaara() {
+        return this.kaannokset.size();
+    }
+    
+}
+
+import java.util.Scanner;
+
+public class Tekstikayttoliittyma {
+    private Scanner lukija;
+    private Sanakirja sanakirja;
+
+    public Tekstikayttoliittyma(Scanner lukija, Sanakirja sanakirja) {
+        this.lukija = lukija;
+        this.sanakirja = sanakirja;
+    }
+
+    public void kaynnista() {
+        System.out.println("Komennot:");
+        System.out.println("  lisaa - lisää sanaparin sanakirjaan");
+        System.out.println("  kaanna - kysyy sanan ja tulostaa sen käännöksen");
+        System.out.println("  lopeta - poistuu käyttöliittymästä");
+        System.out.println("");
+
+        while (true) {
+            System.out.print("Komento: ");
+            String syote = lukija.nextLine();
+            if (syote.equals("lopeta")) {
+                break;
+            }
+
+            hoidaKomento(syote);
+            System.out.println("");
+        }
+
+        System.out.println("Hei hei!");
+    }
+
+    public void hoidaKomento(String komento) {
+        if (komento.equals("lisaa")) {
+            lisaa();
+        } else if (komento.equals("kaanna")) {
+            kaanna();
+        } else {
+            System.out.println("Tuntematon komento.");
+        }
+    }
+
+    public void lisaa() {
+        System.out.print("Suomeksi: ");
+        String sana = this.lukija.nextLine();
+        System.out.print("Käännös: ");
+        String kaannos = this.lukija.nextLine();
+        this.sanakirja.lisaa(sana, kaannos);
+    }
+
+    public void kaanna() {
+        System.out.print("Anna sana: ");
+        String sana = this.lukija.nextLine();
+
+        if (this.sanakirja.kaanna(sana) == null) {
+            System.out.println("Tuntematon sana!");
+        } else {
+            System.out.println("Käännös: " + this.sanakirja.kaanna(sana));
+        }
+    }
+    
+}
+/////////////////////////////////////////////
+import java.util.ArrayList;
+
+ 
+
+public class Hajautustaulu<K, V> {
+
+    private ArrayList<K> avaimet;
+
+    private ArrayList<V> arvot;
+
+    
+
+    public void lisaa(K avain, V arvo){
+
+    if(avain != null && arvo != null){
+
+    avaimet.add(avain);
+
+    arvot.add(arvo);
+
+    }
+
+    }
+
+    public void poista(K avain){
+
+    int indeksi = 0;
+
+        while(indeksi <= avaimet.size()){
+
+            if(avaimet.get(indeksi) == avain){
+
+               avaimet.remove(indeksi);
+
+               arvot.remove(indeksi);
+
+            }
+
+            indeksi++;
+
+        }
+
+    }
+
+    
+
+}
