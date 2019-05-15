@@ -1,0 +1,295 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class TiettyjenLukujenKeskiarvo {
+
+    public static void main(String[] args) {
+        Scanner lukija = new Scanner(System.in);
+        ArrayList<String> syotteet = new ArrayList<>();
+
+// luetaan syotteet
+        while (true) {
+            String rivi = lukija.nextLine();
+            if (rivi.equals("loppu")) {
+                break;
+            }
+
+            syotteet.add(rivi);
+        }
+
+        System.out.println("Tulostetaanko negatiivisten vai positiivisten lukujen keskiarvo? (n/p)");
+        String sana = lukija.nextLine();
+        
+        if(sana.equals("p")){
+            double posi = syotteet.stream()
+            .mapToInt(s -> Integer.valueOf(s))
+            .filter(luku -> luku >= 0)
+            .average()
+            .getAsDouble();
+            System.out.println("Positiivisten lukujen keskiarvo: " + posi);
+        
+        }if(sana.equals("n")){
+            double negis = syotteet.stream()
+            .mapToInt(s -> Integer.valueOf(s))
+            .filter(luku -> luku < 0)
+            .average()
+            .getAsDouble();
+            System.out.println("Negatiivisten lukujen keskiarvo: "+negis);
+            
+        }
+    }
+}
+///////////////////////////////////////////////////
+public class Henkilo {
+
+    private String etunimi;
+    private String sukunimi;
+    private int syntymavuosi;
+
+    public Henkilo(String etunimi, String sukunimi, int syntymavuosi) {
+        this.etunimi = etunimi;
+        this.sukunimi = sukunimi;
+        this.syntymavuosi = syntymavuosi;
+    }
+
+    public String getEtunimi() {
+        return etunimi;
+    }
+
+    public String getSukunimi() {
+        return sukunimi;
+    }
+
+    public int getSyntymavuosi() {
+        return syntymavuosi;
+    }
+
+}
+
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class UniikitSukunimet {
+
+    public static void main(String[] args) {
+        ArrayList<Henkilo> henkilot = new ArrayList<>();
+        Scanner lukija = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("Syötetäänkö henkilöiden tietoja, \"loppu\" lopettaa:");
+            String jatketaan = lukija.nextLine();
+
+            if (jatketaan.equals("loppu")) {
+                break;
+            }
+
+            System.out.print("Syötä etunimi: ");
+            String etunimi = lukija.nextLine();
+            System.out.print("Syötä sukunimi: ");
+            String sukunimi = lukija.nextLine();
+            System.out.print("Syötä syntymävuosi: ");
+            int syntymavuosi = Integer.valueOf(lukija.nextLine());
+
+            henkilot.add(new Henkilo(etunimi, sukunimi, syntymavuosi));
+            System.out.println("");
+        }
+
+        // toteuta uniikkien sukunimien tulostaminen aakkosjärjestyksessä tänne
+        henkilot.stream()
+            .map(henkilo -> henkilo.getSukunimi())
+            .distinct()
+            .sorted()
+            .forEach(nimi -> System.out.println(nimi));
+    }
+}
+////////////////////////////////////////////////
+import java.util.Comparator;
+
+public class SamatMaatVierekkainArvojarjestykseen implements Comparator<Kortti> {
+
+    @Override
+    public int compare(Kortti k1, Kortti k2) {
+        if (k1.getMaa() == k2.getMaa()) {
+            return k1.getArvo() - k2.getArvo();
+        }
+
+        return k1.getMaa().compareTo(k2.getMaa());
+    }
+
+}
+
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+public class Paaohjelma {
+
+    public static void main(String[] args) {
+        Scanner lukija = new Scanner(System.in);
+        ArrayList<Kirja> kirjat = new ArrayList();
+
+        while(true){
+            System.out.print("Syötä kirjan nimi, tyhjä lopettaa: ");
+            String nimi = lukija.nextLine();
+
+            if(nimi.equals("")){
+                break;
+            }
+
+            System.out.print("Syötä kirjan pienin kohdeikä: ");
+            int ika = Integer.valueOf(lukija.nextLine());
+
+            kirjat.add(new Kirja(nimi,ika));
+
+        }
+
+        System.out.println("");
+        System.out.println("Yhteenä " + kirjat.size() + " kirjaa.");
+        System.out.println("Kirjat:");
+
+        Comparator<Kirja> vertailija = Comparator
+                .comparing(Kirja::getIka)
+                .thenComparing(Kirja::getNimi);
+
+        Collections.sort(kirjat, vertailija);
+
+        for(Kirja k : kirjat){
+            System.out.println(k.getNimi() + "(" + k.getIka() + " vuotiaille ja vanhemmille)");
+        }
+
+
+    }
+    //////////////////////////////////////
+    import java.util.ArrayList;
+import java.util.Collections;
+
+public class Kasi implements Comparable<Kasi>{
+    private ArrayList<Kortti> kortit;
+
+    public Kasi() {
+        kortit = new ArrayList();
+    }
+
+
+
+    public void lisaa(Kortti kortti){
+        kortit.add(kortti);
+    }
+
+    public void tulosta(){
+        kortit.stream()
+                .forEach(s -> System.out.println(s.toString()));
+    }
+
+    public void jarjesta(){
+        Collections.sort(kortit);
+    }
+
+    public int summa(){
+        int summa = kortit.stream()
+                .map(s -> s.getArvo())
+                .reduce(0,(eka,toka) -> eka + toka);
+        return summa;
+    }
+
+    @Override
+    public int compareTo(Kasi vertailu){
+        return this.summa() - vertailu.summa();
+    }
+
+    public void jarjestaMaittain(){
+        Collections.sort(kortit,new SamatMaatVierekkainArvojarjestykseen());
+    }
+
+
+}
+
+public class Kortti implements Comparable<Kortti> {
+
+    private int arvo;
+    private Maa maa;
+
+    public Kortti(int arvo, Maa maa) {
+        if (arvo < 2 || arvo > 14) {
+            throw new IllegalArgumentException("Kortin arvon tulee olla väliltä 2...14.");
+        }
+
+        this.arvo = arvo;
+        this.maa = maa;
+    }
+
+    @Override
+    public String toString() {
+        String kortinArvo = "" + arvo;
+        if(arvo == 11) {
+            kortinArvo = "J";
+        } else if (arvo == 12) {
+            kortinArvo = "Q";
+        } else if (arvo == 13) {
+            kortinArvo = "K";
+        } else if (arvo == 14) {
+            kortinArvo = "A";
+        }
+
+        return maa + " " + kortinArvo;
+    }
+
+    public int getArvo() {
+        return arvo;
+    }
+
+    public Maa getMaa() {
+        return maa;
+    }
+
+    @Override
+    public int compareTo(Kortti verrattava){
+        if(this.arvo == verrattava.arvo){
+            return this.getMaa().ordinal() - verrattava.getMaa().ordinal();
+        }
+        return this.arvo - verrattava.arvo;
+    }
+
+}
+
+
+public enum Maa {
+    RISTI, RUUTU, HERTTA, PATA;
+
+}
+
+
+
+
+public class Paaohjelma {
+
+    public static void main(String[] args) {
+        // tee tänne testikoodia
+
+        Kortti eka = new Kortti(2, Maa.RUUTU);
+        Kortti toka = new Kortti(14, Maa.PATA);
+        Kortti kolmas = new Kortti(12, Maa.HERTTA);
+
+        System.out.println(eka);
+        System.out.println(toka);
+        System.out.println(kolmas);
+    }
+}
+
+
+import java.util.Comparator;
+
+public class SamatMaatVierekkainArvojarjestykseen implements Comparator<Kortti> {
+
+    @Override
+    public int compare(Kortti k1, Kortti k2) {
+        if (k1.getMaa() == k2.getMaa()) {
+            return k1.getArvo() - k2.getArvo();
+        }
+
+        return k1.getMaa().compareTo(k2.getMaa());
+    }
+
+}
